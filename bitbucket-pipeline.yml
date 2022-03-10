@@ -1,0 +1,55 @@
+#  Template NodeJS build
+
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: node:14
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Build and Test
+          caches:
+            - node
+          script:
+            - npm install
+            - npm test
+      - step:
+          name: Code linting
+          script:
+            - npm install eslint
+            - npx eslint .
+          caches:
+            - node
+  branches:
+      main:
+        # - parallel:
+          - step:
+              name: Install & Build
+              caches:
+                - node
+              script:
+                - npm install
+                - npm run build
+
+          - step:
+              name: Zip All Files
+              script:
+                # Exclude files to be ignored
+                - git archive --format=tar.gz main -o build.tar.gz
+              artifacts:
+                - "build.tar.gz"
+
+          - step:
+              name: Deploy to Heroku
+              deployment: Production
+              script:
+                # Deploy to Heroku.
+                # See more detail at https://digitact.vercel.app
+                - pipe: atlassian/heroku-deploy:1.2.1
+                  variables:
+                      HEROKU_API_KEY: '$HEROKU_API_KEY'
+                      HEROKU_APP_NAME: '$HEROKU_APP_NAME'
+                      ZIP_FILE: "build.tar.gz"
+                      WAIT: 'true'
