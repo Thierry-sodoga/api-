@@ -9,7 +9,7 @@ export class UserCredentialsRepository extends DefaultCrudRepository<
   UserCredentialsRelations
 > {
   constructor(
-    @inject('datasources.mongodbs') dataSource: MongodbsDataSource,
+    @inject('datasources.mongoatlas') dataSource: MongodbsDataSource,
   ) {
     super(UserCredentials, dataSource);
   }
